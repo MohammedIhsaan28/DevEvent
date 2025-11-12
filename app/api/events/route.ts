@@ -19,6 +19,15 @@ export async function POST(req:NextRequest){
         const file = formData.get('image') as File;
         if(!file) return NextResponse.json({message:'Image file is required'}, {status:400});
 
+        const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+        const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+        
+        if (!ALLOWED_TYPES.includes(file.type)) {
+            return NextResponse.json({message:'Invalid file type. Allowed: JPEG, PNG, WebP'}, {status:400});
+        }
+        if (file.size > MAX_SIZE) {
+            return NextResponse.json({message:'File size exceeds 5MB limit'}, {status:400});
+        }
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
         
@@ -29,10 +38,19 @@ export async function POST(req:NextRequest){
             }).end(buffer);
         })
         
-        events.image= (uploadResult as {secure_url:string}).secure_url;
-        const createdEvent = await Event.create(events);
-        return NextResponse.json({message:'Event created successfully', event: createdEvent}, {status:201});
+        if (!uploadResult.secure_url) {
+            return NextResponse.json({message:'Cloudinary upload failed'}, {status:500});
+        }
 
+        const eventData = {
+            title: events.title,
+            description: events.description,
+            date: events.date,
+            image: uploadResult.secure_url,
+            // Add other validated fields here
+        };
+        const createdEvent = await Event.create(eventData);
+        return NextResponse.json({message:'Event created successfully', event: createdEvent}, {status:201});
     } catch (error) {
         console.error('Error handling POST request:', error);
         return NextResponse.json({message:'Event creation Failed', error: error instanceof Error ? error.message:'Unknown Error'}, {status:500});
@@ -45,6 +63,6 @@ export async function GET(){
         const events = await Event.find().sort({createdAt:-1});
         return NextResponse.json({message:'Events fetched successfully', events}, {status:200});
     } catch (error) {
-        return NextResponse.json({message:'Failed to fetch events',error:error}, {status:500});
+        return NextResponse.json({message:'Failed to fetch events', error: error instanceof Error ? error.message : 'Unknown Error'}, {status:500});
     }
 }

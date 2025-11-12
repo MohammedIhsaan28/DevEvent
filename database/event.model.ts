@@ -113,24 +113,27 @@ const EventSchema = new Schema<IEvent>(
 EventSchema.pre('save', function (next) {
   const event = this as IEvent;
 
-  // Generate slug only if title changed or document is new
-  if (event.isModified('title') || event.isNew) {
-    event.slug = generateSlug(event.title);
-  }
+  try {
+    // Generate slug only if title changed or document is new
+    if (event.isModified('title') || event.isNew) {
+      event.slug = generateSlug(event.title);
+    }
 
-  // Normalize date to ISO format if it's not already
-  if (event.isModified('date')) {
-    event.date = normalizeDate(event.date);
-  }
+    // Normalize date to ISO format if it's not already
+    if (event.isModified('date')) {
+      event.date = normalizeDate(event.date);
+    }
 
-  // Normalize time format (HH:MM)
-  if (event.isModified('time')) {
-    event.time = normalizeTime(event.time);
-  }
+    // Normalize time format (HH:MM)
+    if (event.isModified('time')) {
+      event.time = normalizeTime(event.time);
+    }
 
-  next();
+    next();
+  } catch (error) {
+    next(error as Error);
+  }
 });
-
 // Helper function to generate URL-friendly slug
 function generateSlug(title: string): string {
   return title

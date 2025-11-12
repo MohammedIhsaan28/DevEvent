@@ -38,8 +38,7 @@ export async function GET(req:NextRequest,{params}:RouteParams){
         if(error instanceof Error){
             if(error.message.includes('MONGODB_URI')){
                 return NextResponse.json({
-                    message:'Database configurationn error'
-                },{status:500});
+                    message:'Database configuration error'                },{status:500});
             }
 
             return NextResponse.json({

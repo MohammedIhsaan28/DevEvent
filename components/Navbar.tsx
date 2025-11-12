@@ -9,11 +9,10 @@ export default function Navbar(){
                 <p>DevEvent</p>
                 </Link>
                 <ul>
-                    <Link href='/'>Home</Link>
-                    <Link href='/'>About</Link>
-                    <Link href='/'>Create Events</Link>
-                </ul>
-            </nav>
+                    <li><Link href='/'>Home</Link></li>
+                    <li><Link href='/'>About</Link></li>
+                    <li><Link href='/'>Create Events</Link></li>
+                </ul>            </nav>
         </header>
     )
 }
