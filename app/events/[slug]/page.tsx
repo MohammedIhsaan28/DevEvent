@@ -1,5 +1,9 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import BookEvent from "@/components/BookEvent";
+import { getSimilarEventsBySlug } from "@/lib/actions/event.actions";
+import { IEvent } from "@/database/event.model";
+import EventCard from "@/components/EventCard";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -24,31 +28,43 @@ const EventAgenda =({agendaItems}:{agendaItems:string[]})=>(
 
 const EventTags =({tags}:{tags:string[]})=>(
     <div className="flex flex-row gap-1.5 flex-wrap">
-        <ul>
+        
             {tags.map((tag,idx)=>(
                 <div key={idx} className="pill">{tag}</div>
             ))}
-        </ul>
+        
 
     </div>
 )
 export default async function EventPage({params}:{params:Promise<{slug:string}>}) {
     const {slug} = await params;
     const res = await fetch(`${BASE_URL}/api/events/${slug}`);
-    const {event:{description,image,overview,date,time,location,mode,agenda,audience,tags}} = await res.json()
+    const {event:{description,image,overview,date,time,location,mode,agenda,audience,tags,organizer}} = await res.json()
     if(!description) return notFound();
+
+    const bookings =10;
+    const similarEvents:IEvent[] = await  getSimilarEventsBySlug(slug);
     
 // Normalize agenda into a simple string[]
-let agendaItems: string[] = [];
+// let agendaItems: string[] = [];
 
-if (Array.isArray(agenda) && agenda.length > 0) {
-  // agenda[0] is one long string → split by ','
-  agendaItems = agenda[0]
-    .split(",")         // split into pieces
-    .map((item) => item.trim()) // remove extra spaces
-    .filter(item => item.length > 0); // remove empty strings
-}
+// if (Array.isArray(agenda) && agenda.length > 0 && typeof agenda[0] === 'string') {
+//   // agenda[0] is one long string → split by ','
+//   agendaItems = agenda[0] 
+//     .split(",")         // split into pieces
+//     .map((item) => item.trim()) // remove extra spaces
+//     .filter(item => item.length > 0); // remove empty strings
+// }
 
+// let tagsItems: string[] = [];
+
+// if (Array.isArray(tags) && tags.length > 0 && typeof tags[0] === 'string') {
+//   // tags[0] is one long string → split by ','
+//   tagsItems = tags[0] 
+//     .split(",")         // split into pieces
+//     .map((item) => item.trim()) // remove extra spaces
+//     .filter(item => item.length > 0); // remove empty strings
+// }
 
     
 
@@ -76,14 +92,44 @@ if (Array.isArray(agenda) && agenda.length > 0) {
                         <EventDetailItem icon="/icons/audience.svg" alt="Audience Icon" label={audience} />
 
                     </section>
-                    <EventAgenda agendaItems={agendaItems} />
+                    <EventAgenda agendaItems={agenda} />
+                    <section className="flex-col-gap-2">
+                        <h2>About the Organizer</h2>
+                        <p>{organizer}</p>
+                    </section>
+
+                    <EventTags tags={tags} />
+
+
                 </div>
 
                 {/* Right side Booking Form */}
                 <aside className="booking">
-                    <p className="text-lg font-semibold">Book Event</p>
+                    <div className="signup-card">
+                        <h2>Book Your Spot</h2>
+                        {bookings>0 ? (
+                            <p className="text-sm">Join {bookings} people who have already booked their spot</p>
+                        ):(
+                            <p className="text-sm ">Be the first to book your spot</p>
+                        )}
+                        <BookEvent />
+                    </div>
 
                 </aside>
+
+            </div>
+            <div className="flex w-full flex-col gap-4 pt-20">
+                <h2>Similar Events</h2>
+                <div className="events">
+                    {
+                        similarEvents.length > 0 && 
+                        similarEvents.map((similarEvent:IEvent)=>(
+                            <EventCard key={similarEvent.title} {...similarEvent} />
+
+                        ))
+                    }
+
+                </div>
 
             </div>
         </section>
