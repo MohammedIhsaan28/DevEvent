@@ -21,6 +21,17 @@ const EventAgenda =({agendaItems}:{agendaItems:string[]})=>(
     </div>
 )
 
+
+const EventTags =({tags}:{tags:string[]})=>(
+    <div className="flex flex-row gap-1.5 flex-wrap">
+        <ul>
+            {tags.map((tag,idx)=>(
+                <div key={idx} className="pill">{tag}</div>
+            ))}
+        </ul>
+
+    </div>
+)
 export default async function EventPage({params}:{params:Promise<{slug:string}>}) {
     const {slug} = await params;
     const res = await fetch(`${BASE_URL}/api/events/${slug}`);
