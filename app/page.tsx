@@ -2,7 +2,7 @@ import EventCard from "@/components/EventCard";
 import ExploreBtn from "@/components/ExploreBtn";
 import { IEvent } from "@/database";
 import { cacheLife } from "next/cache";
-import {events} from '@/lib/constants';
+import events from '@/lib/constants';
 
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
@@ -23,13 +23,11 @@ export default async function Home() {
       <h3>Featured Events</h3>
       <ul className="events list-none">
 
-        
-        {events && events.length > 0 && (events as unknown as IEvent[]).map((event: IEvent) => (
+        {events && events.length > 0 && events.map((event: IEvent) => (
           <li key={event.title}>
             <EventCard {...event} />
           </li>
         ))}
- 
       </ul>
       </div>
     </section>

@@ -1,4 +1,4 @@
-export const events = [
+ const events = [
   {
     slug: "react-conf-2024",
     image: "/images/event1.png",
@@ -97,3 +97,4 @@ export const events = [
   },
 ];
 
+export default events;
