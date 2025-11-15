@@ -23,7 +23,7 @@ export default async function Home() {
       <h3>Featured Events</h3>
       <ul className="events list-none">
 
-        {events && events.length > 0 && events.map((event: IEvent) => (
+        {events && events.length > 0 && (events as unknown as IEvent[]).map((event: IEvent) => (
           <li key={event.title}>
             <EventCard {...event} />
           </li>
