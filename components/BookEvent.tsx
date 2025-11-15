@@ -1,15 +1,24 @@
 'use client';
 
+import { createBooking } from "@/lib/actions/booking.actions";
+import posthog from "posthog-js";
 import { useState } from "react";
 
-export default function EventPage(){
+export default function BookEvent({eventId,slug}:{eventId:string,slug:string}){
     const [email,setEmail] = useState("");
     const [submitted,setSubmitted] = useState(false);
-    const HandleSubmit =(e:React.FormEvent)=>{
+    const HandleSubmit = async (e:React.FormEvent) => {
         e.preventDefault();
-        setTimeout(()=>{
+        const {success} = await createBooking({eventId,slug,email}); 
+        if (success){
             setSubmitted(true);
-        },1000);
+            posthog.capture('event booked', {eventId,slug,email});
+            console.log("Booking successful");
+        } else{
+            console.log("Booking failed");
+            posthog.captureException("Booking failed");
+        }
+        
     }
     return(
         <div id='book-event'>
@@ -29,7 +38,7 @@ export default function EventPage(){
                                 suppressHydrationWarning
                             />
                         </div>
-                        <button type="submit" className="button-submit">Submit</button>
+                        <button type="submit" className="button-submit" suppressHydrationWarning>Submit</button>
                     </form>
                 )
             }
